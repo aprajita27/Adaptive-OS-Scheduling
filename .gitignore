@@ -1,0 +1,28 @@
+__pycache__/
+*.py[cod]
+*.so
+
+venv/
+.env/
+.venv/
+
+# Model checkpoints
+ppo_cpu_scheduler.zip
+*.pkl
+*.npz
+
+# TensorBoard logs and PPO training logs
+ppo_logs/
+tb_logs/
+
+# Environment normalization data
+vec_normalize.pkl
+
+.vscode/
+.idea/
+
+.DS_Store
+Thumbs.db
+
+ehthumbs.db
+Icon?
