@@ -1,17 +1,17 @@
 import numpy as np
-import gym
-from gym import spaces
+import gym  # custom env
+from gym import spaces  # action and observation spaces 
 
 class CPUSchedulingEnv(gym.Env):
     def __init__(self, all_processes):
         super().__init__()
-        self.all_processes = all_processes
+        self.all_processes = all_processes  #  list of process dictionaries
         self.num_features = 6  # [arrival_time, burst_time, priority, memory, cpu_req, scheduled]
-        self.max_processes = len(all_processes)
-        self.max_obs = self.max_processes * self.num_features
+        self.max_processes = len(all_processes)  # number of processes 
+        self.max_obs = self.max_processes * self.num_features  # size of obs vector
 
-        self.context_switch_cost = 2
-        self.current_process = None
+        self.context_switch_cost = 2  # penalty for switching
+        self.current_process = None  # 
 
         print(f"[env.py] Detected {self.max_processes} processes. Setting obs shape = ({self.max_obs},)")
 
