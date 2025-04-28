@@ -9,6 +9,8 @@ from train_ppo import train_and_run_ppo
 from plot_results import plot_comparison
 import copy
 
+# choose only processes that were actually scheduled 
+# print avg performance metrics 
 def print_metrics(processes, name="Scheduler"):
     valid = [p for p in processes if p.get("start_time") is not None and p.get("finish_time") is not None]
     if not valid:
@@ -29,16 +31,17 @@ def print_metrics(processes, name="Scheduler"):
     print(f"Average response time = {total_response / n:.4f}")
 
 
-
+# populate processes dynamically
 procs = generate_dynamic_processes(n=100)
 
+# print individual process information
 for i, proc in enumerate(procs):
     print(f"{i+1}: Arrival={proc.get('arrival_time')}, Burst={proc.get('burst_time')}, "
           f"Priority={proc.get('priority')}, Memory={proc.get('memory')}, "
           f"CPU Req={proc.get('cpu_req')}, Start={proc.get('start_time', '-')}, "
           f"Finish={proc.get('finish_time', '-')}")
 
-
+# print results for individual algorithms
 fcfs_result = simulate_fcfs_algorithm(copy.deepcopy(procs))
 print_metrics(fcfs_result, "FCFS")
 

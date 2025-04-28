@@ -1,3 +1,5 @@
+# returns the sorted list of processes a/c to arrival time
+
 import random
 
 def generate_dynamic_processes(n=100, max_arrival=50):
