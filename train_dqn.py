@@ -24,6 +24,7 @@ class DQN(nn.Module):
         return self.net(x)  # forward pass
 
 def train_and_run_dqn(all_processes, retrain=False):
+    print("in dqn train")
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')  # use gpu on colab 
     print(f"Using device: {device}")
 
@@ -107,7 +108,9 @@ def train_and_run_dqn(all_processes, retrain=False):
 
     else:
         q_net.load_state_dict(torch.load("dqn_model.pth", map_location=device))
+        print("in dqn train else block")
         #q_net.load_state_dict(torch.load("/content/drive/MyDrive/CSCI566-S25-Material/DL Project/Adaptive-OS-Scheduling/dqn_model.pth", map_location=device))
+        print("in dqn train else block model loaded")
 
     # Evaluation
     print("--- hello entering evalution --- ")

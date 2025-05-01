@@ -7,6 +7,7 @@ from traditional_algorithms import (
 )
 from train_ppo import train_and_run_ppo
 from train_dqn import train_and_run_dqn  # Import the DQN scheduler
+from train_qmix import train_and_run_qmix  # qmix
 from plot_results import plot_comparison
 import copy
 
@@ -61,6 +62,9 @@ print_metrics(ppo_result, "PPO")
 dqn_result = train_and_run_dqn(copy.deepcopy(procs), retrain=False)
 print_metrics(dqn_result, "DQN")
 
+qmix_result = train_and_run_qmix(copy.deepcopy(procs), retrain=False)
+print_metrics(qmix_result, "QMIX")
+
 
 # plot results
 all_results = {}
@@ -71,7 +75,8 @@ for name, result in [
     ("Priority Preemptive", priority_result),
     ("Round Robin", rr_result),
     ("PPO", ppo_result),
-    ("DQN", dqn_result)
+    ("DQN", dqn_result),
+    ("QMIX", qmix_result)
 ]:
     valid = [p for p in result if p.get("start_time") is not None and p.get("finish_time") is not None]
     burst_sum = sum([p.get("burst_time", 0) for p in valid])
