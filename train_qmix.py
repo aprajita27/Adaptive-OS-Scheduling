@@ -1,3 +1,5 @@
+# changed to 4 cores 
+
 print("--- hello in train_qmix, fixed mixing network forward function ---")
 
 import os
@@ -11,10 +13,13 @@ import torch.optim as optim
 from tqdm import tqdm
 from multi_core_env import MultiCoreSchedulingEnv
 
-MODEL_PATH = "qmix_cpu_scheduler.pt"
+#MODEL_PATH = "qmix_cpu_scheduler.pt"
+MODEL_PATH = "qmix_cpu_scheduler_4_cores.pt"
 
 # when using colab
 #MODEL_PATH = "/content/drive/MyDrive/CSCI566-S25-Material/DL Project/Adaptive-OS-Scheduling/qmix_cpu_scheduler.pt"  
+#MODEL_PATH = "/content/drive/MyDrive/CSCI566-S25-Material/DL Project/Adaptive-OS-Scheduling/qmix_cpu_scheduler_4_cores.pt"  
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -206,8 +211,12 @@ def evaluate_qmix(env, agent_nets, mixing_net, max_steps=20000):
 
 # main function
 def train_and_run_qmix(processes, retrain=False):
-    env = MultiCoreSchedulingEnv(processes, n_cores=2)  # number of processor or agent
+    env = MultiCoreSchedulingEnv(processes, n_cores=4)  # number of processor or agent
     n_agents = env.n_cores
+
+    print()
+    print("Number of agents or cores: ", n_agents)
+
     obs_shape = env.observation_space.shape
     
     obs_dim = obs_shape[1]
