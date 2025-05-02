@@ -147,13 +147,23 @@ print_metrics(rr_result, "Round Robin")
 # --- PPO (Single-Agent) ---
 ppo_result = train_and_run_ppo(copy.deepcopy(procs), retrain=False)
 print_metrics(ppo_result, "PPO")
-# plot_gantt_chart(ppo_result, title="PPO Scheduling Gantt Chart")
+plot_gantt_chart(ppo_result, title="PPO Scheduling Gantt Chart")
 
 
 # --- MAPPO (Multi-Agent) ---
 mappo_result = train_and_run_mappo(copy.deepcopy(procs), retrain=False, n_cores=4)
 print_metrics(mappo_result, "MAPPO")
 plot_gantt_chart(mappo_result, title="MAPPO Scheduling Gantt Chart")
+
+# dqn and qmix
+dqn_result = train_and_run_dqn(copy.deepcopy(procs), retrain=False)
+print_metrics(dqn_result, "DQN")
+#plot_gantt_chart(ppo_result, title="DQN Scheduling Gantt Chart")
+
+qmix_result = train_and_run_qmix(copy.deepcopy(procs), retrain=False)
+print_metrics(qmix_result, "QMIX")
+plot_gantt_chart(qmix_result, title="QMIX Scheduling Gantt Chart")
+
 
 
 # --- Plot all results ---
