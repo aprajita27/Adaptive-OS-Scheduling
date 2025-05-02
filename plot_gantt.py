@@ -1,16 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
-def plot_gantt_chart(processes, title="Gantt Chart", save_path=None):
-    """
-    Plots a Gantt chart showing when and where each process was scheduled.
-    
-    Args:
-        processes (list of dict): List of finished processes with 'start_time', 'finish_time', and 'core_id'.
-        title (str): Plot title.
-        save_path (str): If provided, saves the figure instead of showing it.
-    """
-
+def plot_gantt_chart(processes, title="Gantt Chart", save_path="plots/"):
     if not processes:
         print("[plot_gantt.py] No finished processes to plot.")
         return
@@ -43,14 +34,13 @@ def plot_gantt_chart(processes, title="Gantt Chart", save_path=None):
     ax.set_title(title)
     ax.grid(True)
 
-    # Optional legend
     patches = [mpatches.Patch(color=colors[c % len(colors)], label=f'Core {c}') for c in sorted(cores)]
     ax.legend(handles=patches, bbox_to_anchor=(1.05, 1), loc='upper left')
 
     plt.tight_layout()
 
     if save_path:
-        plt.savefig(save_path)
+        plt.savefig(f"plots/{title.replace(' ', '_')}_gantt.png")
         print(f"[plot_gantt.py] Gantt chart saved to {save_path}")
     else:
         plt.show()
