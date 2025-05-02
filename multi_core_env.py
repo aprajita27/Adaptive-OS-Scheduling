@@ -99,7 +99,6 @@ class MultiCoreSchedulingEnv(gym.Env):
                 selected["start_time"] = self.current_time
                 selected["core_id"] = core_id
 
-
             selected["remaining_time"] -= 1
             self.current_time += 1
 
@@ -123,7 +122,6 @@ class MultiCoreSchedulingEnv(gym.Env):
             return self._get_obs(), 1000, True, {}
 
         return self._get_obs(), sum(rewards), False, {}
-
 
     @property
     def finished_processes(self):
