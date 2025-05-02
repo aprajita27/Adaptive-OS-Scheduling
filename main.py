@@ -92,11 +92,15 @@ from traditional_algorithms import (
     simulate_rr_algorithm,
 )
 from train_ppo import train_and_run_ppo
+from train_dqn import train_and_run_dqn  # Import the DQN scheduler
+from train_qmix import train_and_run_qmix  # qmix
 from train_mappo import train_and_run_mappo  # <-- (NEW Import added)
 from plot_results import plot_comparison
 import copy
 from plot_gantt import plot_gantt_chart
 
+# choose only processes that were actually scheduled 
+# print avg performance metrics 
 def print_metrics(processes, name="Scheduler"):
     valid = [p for p in processes if p.get("start_time") is not None and p.get("finish_time") is not None]
     if not valid:
@@ -116,15 +120,18 @@ def print_metrics(processes, name="Scheduler"):
     print(f"Average turn around time = {total_turnaround / n:.4f}")
     print(f"Average response time = {total_response / n:.4f}")
 
-procs = generate_dynamic_processes(n=50)
 
+# populate processes dynamically
+procs = generate_dynamic_processes(n=100)
+
+# print individual process information
 for i, proc in enumerate(procs):
     print(f"{i+1}: Arrival={proc.get('arrival_time')}, Burst={proc.get('burst_time')}, "
           f"Priority={proc.get('priority')}, Memory={proc.get('memory')}, "
           f"CPU Req={proc.get('cpu_req')}, Start={proc.get('start_time', '-')}, "
           f"Finish={proc.get('finish_time', '-')}")
 
-# --- Traditional Algorithms ---
+# print results for individual algorithms
 fcfs_result = simulate_fcfs_algorithm(copy.deepcopy(procs))
 print_metrics(fcfs_result, "FCFS")
 
@@ -158,7 +165,9 @@ for name, result in [
     ("Priority Preemptive", priority_result),
     ("Round Robin", rr_result),
     ("PPO", ppo_result),
-    ("MAPPO", mappo_result)
+    ("MAPPO", mappo_result),
+    ("DQN", dqn_result),
+    ("QMIX", qmix_result)
 ]:
     valid = [p for p in result if p.get("start_time") is not None and p.get("finish_time") is not None]
     burst_sum = sum([p.get("burst_time", 0) for p in valid])

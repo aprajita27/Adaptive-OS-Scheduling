@@ -1,3 +1,5 @@
+# simulation of traditional algorithms
+
 def simulate_fcfs_algorithm(processes):
     queue = sorted(processes.copy(), key=lambda p: p["arrival_time"])
     time = 0
