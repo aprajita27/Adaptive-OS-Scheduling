@@ -1,24 +1,17 @@
+
 import numpy as np
 import gym
 from gym import spaces
 
 class MultiCoreSchedulingEnv(gym.Env):
-    def __init__(self, all_processes, n_cores=2):
+    def __init__(self, all_processes, n_cores=4):
         super().__init__()
         self.all_processes = all_processes
         self.n_cores = n_cores
         self.context_switch_cost = 2
 
-        # Process features: arrival, remaining_time, priority, memory, cpu_req, scheduled
         self.num_features = 6
         self.max_processes = len(all_processes)
-
-        self.cores_ready_queues = [[] for _ in range(self.n_cores)]
-        self.cores_current_processes = [None] * self.n_cores
-        self.finished = []
-        self.current_time = 0
-
-        # Each agent observes its local ready queue + global info (optional)
         self.max_queue_size = self.max_processes // self.n_cores + 5
 
         self.observation_space = spaces.Box(
@@ -26,8 +19,7 @@ class MultiCoreSchedulingEnv(gym.Env):
             shape=(self.n_cores, self.max_queue_size * self.num_features),
             dtype=np.float32
         )
-
-        self.action_space = spaces.MultiDiscrete([self.max_queue_size for _ in range(self.n_cores)])
+        self.action_space = spaces.Discrete(self.max_queue_size ** self.n_cores)
 
         self.reset()
 
@@ -52,7 +44,6 @@ class MultiCoreSchedulingEnv(gym.Env):
     def _inject_processes(self):
         for p in self.processes:
             if p["arrival_time"] == self.current_time and not p["scheduled"]:
-                # Assign to core with least loaded queue
                 core_id = np.argmin([len(q) for q in self.cores_ready_queues])
                 self.cores_ready_queues[core_id].append(p)
                 p["scheduled"] = True
@@ -70,26 +61,30 @@ class MultiCoreSchedulingEnv(gym.Env):
                     min(p["cpu_req"] / 100, 1.0),
                     int(p.get("scheduled", False))
                 ]
-            # Padding
             queue_obs += [0] * (self.max_queue_size * self.num_features - len(queue_obs))
             obs.append(queue_obs)
         return np.array(obs, dtype=np.float32)
 
-    def step(self, actions):
+    def step(self, action):
         self._inject_processes()
-
         rewards = []
 
-        for core_id, action in enumerate(actions):
+        decoded_actions = []
+        flat_action = int(action)
+        for _ in range(self.n_cores):
+            decoded_actions.append(flat_action % self.max_queue_size)
+            flat_action //= self.max_queue_size
+        decoded_actions = decoded_actions[::-1]
+
+        for core_id, selected_index in enumerate(decoded_actions):
             queue = self.cores_ready_queues[core_id]
             if not queue:
-                rewards.append(-3)  # idle penalty
+                rewards.append(-3)
                 continue
 
-            selected_index = action % len(queue)
+            selected_index = selected_index % len(queue)
             selected = queue[selected_index]
-
-            reward = -1  # step penalty
+            reward = -1
 
             if self.cores_current_processes[core_id] and self.cores_current_processes[core_id] != selected:
                 reward -= 0.5 * self.context_switch_cost
@@ -98,7 +93,6 @@ class MultiCoreSchedulingEnv(gym.Env):
             if selected.get("start_time") is None:
                 selected["start_time"] = self.current_time
                 selected["core_id"] = core_id
-
 
             selected["remaining_time"] -= 1
             self.current_time += 1
@@ -109,7 +103,9 @@ class MultiCoreSchedulingEnv(gym.Env):
                 self.cores_ready_queues[core_id].remove(selected)
                 self.cores_current_processes[core_id] = None
                 turnaround = selected["finish_time"] - selected["arrival_time"]
-                reward += 300 - turnaround
+                wait_penalty = (self.current_time - selected["arrival_time"]) * 0.05
+                efficiency_bonus = (100 - selected["cpu_req"]) * 0.01
+                reward += 300 - turnaround - wait_penalty + efficiency_bonus
             else:
                 self.cores_current_processes[core_id] = selected
 
@@ -117,13 +113,12 @@ class MultiCoreSchedulingEnv(gym.Env):
 
         done = len(self.finished) == self.max_processes
         if self.current_time > 10000:
-            return self._get_obs(), -1000, True, {}
+            return self._get_obs(), np.array([-1000]), True, {}
 
         if done:
-            return self._get_obs(), 1000, True, {}
+            return self._get_obs(), np.array([1000]), True, {}
 
-        return self._get_obs(), sum(rewards), False, {}
-
+        return self._get_obs(), np.array([sum(rewards)]), False, {}
 
     @property
     def finished_processes(self):

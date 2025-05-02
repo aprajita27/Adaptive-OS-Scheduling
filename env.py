@@ -91,7 +91,7 @@ class CPUSchedulingEnv(gym.Env):
 
             turnaround = selected["finish_time"] - selected["arrival_time"]
             waiting = selected["start_time"] - selected["arrival_time"]
-            reward += 300 - (turnaround + waiting)  # sharper reward
+            reward += 300 - (turnaround + waiting)  # final reward
         else:
             self.current_process = selected
 
